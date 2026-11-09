@@ -16,7 +16,7 @@ import re
 import platform
 
 APP_NAME = "Python Manager"
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 GITHUB = "https://github.com/itsnavin"
 
 # ── Python versions offered in the UI ────────────────────────────────────────
@@ -514,10 +514,15 @@ class PythonManagerApp(tk.Tk):
         return result["pw"]
 
     # ── subprocess helper: stream lines into log ──────────────────────────────
-    def _run_stream(self, cmd, use_sudo=True, check_rc=True):
-        """Run a command, streaming output to the log. Returns returncode."""
+    def _run_stream(self, cmd, use_sudo=True, check_rc=True, preserve_env=False):
+        """Run a command, streaming output to the log. Returns returncode.
+
+        preserve_env=True adds -E to sudo so the caller's environment variables
+        (e.g. PYENV_ROOT) are inherited by the privileged child process.
+        """
         if use_sudo:
-            full_cmd = ["sudo", "-S", "-p", "", "--"] + cmd
+            sudo_flags = ["-E"] if preserve_env else []
+            full_cmd = ["sudo", "-S", "-p", ""] + sudo_flags + ["--"] + cmd
         elif os.geteuid() == 0 and os.environ.get("SUDO_USER"):
             # App was started with sudo: never let pip etc. run as root
             full_cmd = ["sudo", "-u", os.environ["SUDO_USER"], "-H", "--"] + cmd
@@ -838,14 +843,35 @@ class PythonManagerApp(tk.Tk):
 
     # ── Non-debian install (pyenv fallback) ───────────────────────────────────
     def _install_python_other(self, version):
-        self._log("Non-Debian system detected. Trying pyenv…", "warn")
-        if not shutil.which("pyenv"):
+        self._log("Trying pyenv for Python installation…", "warn")
+        pyenv_bin = shutil.which("pyenv")
+        if not pyenv_bin:
             self._log("pyenv not found. Install pyenv first:\n"
                       "  curl https://pyenv.run | bash\n"
                       "then re-run this installer.", "err")
             return False
-        rc = self._run_stream(["pyenv", "install", "--skip-existing", version],
-                              use_sudo=False)
+
+        # Determine the effective PYENV_ROOT (may be a system-wide directory).
+        pyenv_root = os.environ.get(
+            "PYENV_ROOT", os.path.join(target_user()[1], ".pyenv"))
+        self._log(f"PYENV_ROOT = {pyenv_root}", "dim")
+
+        # Check whether the current user can write to it (or create it).
+        test_path = pyenv_root if os.path.exists(pyenv_root) \
+            else os.path.dirname(pyenv_root) or "/"
+        need_sudo = not os.access(test_path, os.W_OK)
+
+        if need_sudo:
+            self._log(
+                f"PYENV_ROOT ({pyenv_root}) is not writable by the current user.\n"
+                f"Running pyenv install with sudo (environment preserved)…",
+                "warn")
+
+        # Use the full path to pyenv so sudo can find it regardless of PATH.
+        rc = self._run_stream(
+            [pyenv_bin, "install", "--skip-existing", version],
+            use_sudo=need_sudo,
+            preserve_env=need_sudo)   # -E keeps PYENV_ROOT / PATH intact
         return rc == 0
 
     # ── update-alternatives ───────────────────────────────────────────────────
