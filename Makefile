@@ -17,7 +17,7 @@ SPEC    := $(TARGET).spec
 DISTDIR := dist
 PKGDIR  := package
 
-VERSION ?= 1.0.1
+VERSION ?= 1.0.2
 # x86_64, aarch64 or armv7l
 ARCH    := $(shell uname -m)
 TARBALL := $(TARGET)-$(VERSION)-linux-$(ARCH).tar.gz

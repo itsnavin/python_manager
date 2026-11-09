@@ -7,7 +7,7 @@ A graphical Python version and module installer for Linux (x86-64 and ARM).
 
 ## Features
 
-- **Select Python version** to install (3.9 – 3.13)
+- **Select Python version** to install (3.10 – 3.14)
 - **Browse & search a curated module list** across 7 categories: Data Science, ML/AI, Web, Database, Utilities, IoT/Hardware, Data Formats
 - **One-click install** — adds the deadsnakes PPA on Ubuntu, runs `apt-get`, bootstraps pip
 - **Set as default** — registers the installed version with `update-alternatives` so `python` and `python3` point to it
@@ -16,46 +16,23 @@ A graphical Python version and module installer for Linux (x86-64 and ARM).
 
 ## Screenshot
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 🐍 Python Manager v1.0.0           Ubuntu 24.04 | aarch64   │
-├──────────────┬──────────────────────────────────────────────┤
-│ Python       │ 🔍 [search...]                 [All] [None]  │
-│ Version      │                                              │
-│              │ ── Data Science ─────────────────────────── │
-│ ○ 3.9        │  [✓] NumPy          [✓] Pandas              │
-│ ○ 3.10       │  [ ] Matplotlib     [ ] SciPy               │
-│ ● 3.11       │                                              │
-│ ○ 3.12 ✔     │ ── Machine Learning / AI ─────────────────  │
-│ ○ 3.13       │  [ ] scikit-learn   [ ] TensorFlow          │
-│              │  ...                                         │
-│ Installed    │                                              │
-│ 3.12         │  3 modules selected                         │
-├──────────────┴──────────────────────────────────────────────┤
-│ [✓] Set as default (update-alternatives)  [✓] Also install  │
-│ pip + venv                                     [ Install ]  │
-├─────────────────────────────────────────────────────────────┤
-│ Output                                               [Clear] │
-│ $ sudo apt-get install python3.11                           │
-│ ...                                                         │
-└─────────────────────────────────────────────────────────────┘
-```
+![Python Manager screenshot](screenshot.png)
 
 ## Install (prebuilt binary)
 
-Download the binary for your architecture from the [Releases](../../releases) page.
+Download from the [Releases](https://github.com/itsnavin/python_manager/releases) page.
 
 | Architecture | File |
 |---|---|
-| x86-64 PC | `python_manager-linux-x86_64` |
-| Raspberry Pi 5 (64-bit OS) | `python_manager-linux-aarch64` |
-| Raspberry Pi (32-bit OS) | `python_manager-linux-armv7l` |
+| x86-64 PC | `python_manager-1.0.2-linux-x86_64.tar.gz` |
+| Raspberry Pi / ARM | build on the Pi (see [ARM](#arm-raspberry-pi)) or run from source |
 
 ```bash
-# Example for a 64-bit Raspberry Pi
-wget https://github.com/itsnavin/python_manager/releases/latest/download/python_manager-linux-aarch64
-chmod +x python_manager-linux-aarch64
-./python_manager-linux-aarch64
+wget https://github.com/itsnavin/python_manager/releases/download/v1.0.2/python_manager-1.0.2-linux-x86_64.tar.gz
+wget https://github.com/itsnavin/python_manager/releases/download/v1.0.2/python_manager-1.0.2-linux-x86_64.tar.gz.sha256
+sha256sum -c python_manager-1.0.2-linux-x86_64.tar.gz.sha256
+tar xzf python_manager-1.0.2-linux-x86_64.tar.gz
+./python_manager-1.0.2-linux-x86_64/python_manager
 ```
 
 > **Note:** The binary is self-contained but it still needs `python3-tk`'s runtime libraries on the host.
